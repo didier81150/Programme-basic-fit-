@@ -1,1 +1,592 @@
 # Programme-basic-fit-
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Programme Basic Fit</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF4D00;
+    --orange-light: #FF6B2B;
+    --dark: #0A0A0A;
+    --dark2: #141414;
+    --dark3: #1E1E1E;
+    --card: #1A1A1A;
+    --border: #2A2A2A;
+    --text: #F0F0F0;
+    --muted: #888;
+    --blue: #00B4FF;
+    --green: #00D46A;
+    --red: #FF3366;
+    --yellow: #FFD600;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--dark); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; overflow-x:hidden; }
+
+  .header { background:var(--dark2); border-bottom:2px solid var(--orange); padding:18px 20px 14px; position:sticky; top:0; z-index:100; }
+  .logo { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--orange); letter-spacing:2px; line-height:1; }
+  .header-pills { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .pill { font-size:10px; font-weight:600; padding:3px 10px; border-radius:20px; letter-spacing:0.5px; text-transform:uppercase; }
+  .pill-orange { background:rgba(255,77,0,0.15); color:var(--orange); border:1px solid rgba(255,77,0,0.3); }
+  .pill-blue { background:rgba(0,180,255,0.1); color:var(--blue); border:1px solid rgba(0,180,255,0.25); }
+  .pill-green { background:rgba(0,212,106,0.1); color:var(--green); border:1px solid rgba(0,212,106,0.25); }
+
+  .tabs { display:flex; background:var(--dark2); border-bottom:1px solid var(--border); overflow-x:auto; scrollbar-width:none; }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab { flex:1; min-width:80px; padding:12px 8px; text-align:center; font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:1px; color:var(--muted); cursor:pointer; border-bottom:3px solid transparent; transition:all 0.2s; white-space:nowrap; }
+  .tab:hover { color:var(--text); }
+  .tab.active { color:var(--orange); border-bottom-color:var(--orange); }
+  .tab.active.blue { color:var(--green); border-bottom-color:var(--green); }
+  .tab.active.red { color:var(--red); border-bottom-color:var(--red); }
+  .tab.active.tapis { color:var(--blue); border-bottom-color:var(--blue); }
+  .tab.active.conseils { color:var(--yellow); border-bottom-color:var(--yellow); }
+
+  .panel { display:none; padding:16px; animation:fadeIn 0.2s ease; }
+  .panel.active { display:block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+
+  .session-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .session-badge { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+  .badge-orange { background:rgba(255,77,0,0.15); }
+  .badge-green { background:rgba(0,212,106,0.12); }
+  .badge-red { background:rgba(255,51,102,0.12); }
+  .session-info h2 { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; line-height:1; }
+  .session-info p { font-size:12px; color:var(--muted); margin-top:2px; }
+
+  /* EXERCISE CARD */
+  .exercise-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:10px 12px; margin-bottom:10px; display:flex; align-items:center; gap:10px; position:relative; overflow:hidden; }
+  .exercise-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; }
+  .exercise-card.accent-orange::before { background:var(--orange); }
+  .exercise-card.accent-green::before { background:var(--green); }
+  .exercise-card.accent-red::before { background:var(--red); }
+  .exercise-card.key { border-color:var(--orange); background:rgba(255,77,0,0.05); }
+  .key-badge { position:absolute; top:6px; right:9px; font-size:9px; font-weight:700; color:var(--orange); text-transform:uppercase; letter-spacing:0.5px; }
+
+  /* THUMBNAIL */
+  .ex-thumb { width:62px; height:62px; border-radius:10px; object-fit:cover; flex-shrink:0; background:var(--dark3); border:1px solid var(--border); }
+  .ex-thumb-wrap { width:62px; height:62px; border-radius:10px; flex-shrink:0; background:var(--dark3); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden; }
+
+  .ex-num { width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:13px; flex-shrink:0; }
+  .num-o { background:rgba(255,77,0,0.15); color:var(--orange); }
+  .num-g { background:rgba(0,212,106,0.12); color:var(--green); }
+  .num-r { background:rgba(255,51,102,0.12); color:var(--red); }
+
+  .ex-info { flex:1; min-width:0; }
+  .ex-name { font-weight:600; font-size:13px; line-height:1.2; }
+  .ex-target { font-size:11px; color:var(--muted); margin-top:2px; }
+
+  .ex-sets { text-align:right; flex-shrink:0; }
+  .sets-big { font-family:'Bebas Neue',sans-serif; font-size:19px; line-height:1; }
+  .sets-label { font-size:10px; color:var(--muted); letter-spacing:0.5px; }
+
+  .section-label { font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:16px 0 10px; display:flex; align-items:center; gap:8px; }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  .warm-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:10px 12px; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+
+  /* TAPIS */
+  .tapis-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  .tapis-stat { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:center; }
+  .tapis-stat .big { font-family:'Bebas Neue',sans-serif; font-size:32px; color:var(--blue); line-height:1; }
+  .tapis-stat .unit { font-size:12px; color:var(--muted); }
+  .tapis-stat .label { font-size:11px; color:var(--muted); margin-top:4px; }
+
+  .phase-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:14px; }
+  .phase-icon { font-size:24px; width:40px; text-align:center; flex-shrink:0; }
+  .phase-info h3 { font-size:14px; font-weight:600; }
+  .phase-info p { font-size:12px; color:var(--muted); margin-top:2px; }
+  .phase-time { margin-left:auto; font-family:'Bebas Neue',sans-serif; font-size:20px; flex-shrink:0; }
+
+  .hr-zone { background:linear-gradient(135deg,rgba(0,180,255,0.08),rgba(0,212,106,0.08)); border:1px solid rgba(0,180,255,0.25); border-radius:14px; padding:16px; margin-bottom:16px; text-align:center; }
+  .hr-zone .bpm { font-family:'Bebas Neue',sans-serif; font-size:48px; background:linear-gradient(135deg,var(--blue),var(--green)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1; }
+  .hr-zone .bpm-label { font-size:12px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-top:4px; }
+
+  /* CHECKLIST */
+  .checklist { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:16px; }
+  .check-item { display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); cursor:pointer; transition:background 0.15s; }
+  .check-item:last-child { border-bottom:none; }
+  .check-item:hover { background:rgba(255,255,255,0.03); }
+  .check-box { width:22px; height:22px; border-radius:6px; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s; font-size:12px; }
+  .check-item.done .check-box { background:var(--green); border-color:var(--green); }
+  .check-item.done .check-text { text-decoration:line-through; color:var(--muted); }
+  .check-text { font-size:13px; flex:1; }
+  .check-time { font-size:11px; color:var(--muted); flex-shrink:0; }
+
+  .conseil-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:10px; }
+  .conseil-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .conseil-icon { font-size:20px; }
+  .conseil-title { font-weight:600; font-size:14px; }
+  .conseil-body { font-size:13px; color:#BBB; line-height:1.6; }
+  .conseil-card.highlight { border-color:var(--yellow); background:rgba(255,214,0,0.04); }
+
+  .prog-rule { background:var(--dark2); border:1px solid var(--orange); border-radius:14px; padding:16px; margin-bottom:16px; }
+  .prog-rule h3 { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--orange); letter-spacing:1px; margin-bottom:8px; }
+  .prog-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .prog-row:last-child { border-bottom:none; }
+  .prog-icon { font-size:16px; width:24px; text-align:center; }
+
+  .timer-btn { width:100%; background:var(--orange); color:white; border:none; border-radius:14px; padding:16px; font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px; cursor:pointer; margin-top:8px; transition:background 0.2s; }
+  .timer-btn:hover { background:var(--orange-light); }
+  .timer-display { text-align:center; font-family:'Bebas Neue',sans-serif; font-size:52px; color:var(--orange); padding:10px 0; display:none; }
+  .rest-bar { height:4px; background:var(--border); border-radius:2px; margin-top:12px; overflow:hidden; }
+  .rest-fill { height:100%; background:var(--orange); border-radius:2px; transition:width 1s linear; }
+
+  .cal-week { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:16px; }
+  .cal-day { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:8px 4px; text-align:center; }
+  .cal-day .day-name { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+  .cal-day .day-icon { font-size:16px; margin:4px 0; }
+  .cal-day .day-label { font-size:8px; color:var(--muted); }
+  .cal-day.active-day { border-color:var(--orange); background:rgba(255,77,0,0.08); }
+  .cal-day.active-day .day-name { color:var(--orange); }
+
+  .bottom-space { height:30px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">BASIC FIT — MON PROGRAMME</div>
+  <div class="header-pills">
+    <span class="pill pill-orange">58 ans</span>
+    <span class="pill pill-blue">85–95 kg</span>
+    <span class="pill pill-green">3×/semaine</span>
+    <span class="pill pill-orange">Objectif : Graisse viscérale</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('lundi',this)">🔵 Lundi</div>
+  <div class="tab" onclick="switchTab('mercredi',this)">🟢 Mercredi</div>
+  <div class="tab" onclick="switchTab('samedi',this)">🔴 Samedi</div>
+  <div class="tab" onclick="switchTab('tapis',this)">🏃 Tapis</div>
+  <div class="tab" onclick="switchTab('conseils',this)">💡 Conseils</div>
+</div>
+
+<!-- ===== LUNDI ===== -->
+<div id="panel-lundi" class="panel active">
+  <div class="session-header">
+    <div class="session-badge badge-orange">🔵</div>
+    <div class="session-info">
+      <h2 style="color:var(--orange)">LUNDI — HAUT DU CORPS A</h2>
+      <p>Pectoraux · Dos · 40 min muscu + 40 min tapis</p>
+    </div>
+  </div>
+
+  <div class="section-label">Échauffement</div>
+  <div class="warm-card">
+    <div class="ex-thumb-wrap">🚴</div>
+    <div class="ex-info"><div class="ex-name">Vélo ou marche légère</div><div class="ex-target">Monter progressivement la fréquence cardiaque</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--orange)">5'</div><div class="sets-label">MIN</div></div>
+  </div>
+
+  <div class="section-label">Pectoraux</div>
+
+  <div class="exercise-card accent-orange">
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://bodybuilding-wizard.com/wp-content/uploads/2014/04/pec-deck-flyes-1.jpg"
+        alt="Pec Deck"
+        onerror="this.parentNode.innerHTML='🦋'">
+    </div>
+    <div class="ex-num num-o">1</div>
+    <div class="ex-info"><div class="ex-name">Pec Deck (Butterfly)</div><div class="ex-target">Pectoraux isolés</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--orange)">3×12</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="exercise-card accent-orange">
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://weighttraining.guide/wp-content/uploads/2016/10/machine-chest-press.png"
+        alt="Chest Press"
+        onerror="this.parentNode.innerHTML='🏋️'">
+    </div>
+    <div class="ex-num num-o">2</div>
+    <div class="ex-info"><div class="ex-name">Chest Press machine</div><div class="ex-target">Pecs + triceps</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--orange)">3×12</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="section-label">Dos</div>
+
+  <div class="exercise-card accent-orange">
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://bodybuilding-wizard.com/wp-content/uploads/2015/03/machine-lat-pulldown-1.jpg"
+        alt="Lat Pulldown"
+        onerror="this.parentNode.innerHTML='⬇️'">
+    </div>
+    <div class="ex-num num-o">3</div>
+    <div class="ex-info"><div class="ex-name">Tirage vertical (Lat Pulldown)</div><div class="ex-target">Grand dorsal</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--orange)">3×12</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="exercise-card accent-orange">
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://www.inspireusafoundation.org/wp-content/uploads/2022/04/seated-cable-row.gif"
+        alt="Cable Row"
+        onerror="this.parentNode.innerHTML='🚣'">
+    </div>
+    <div class="ex-num num-o">4</div>
+    <div class="ex-info"><div class="ex-name">Rowing machine assise</div><div class="ex-target">Dos moyen + biceps</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--orange)">3×12</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="exercise-card accent-orange">
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://www.inspireusafoundation.org/wp-content/uploads/2022/09/cable-face-pull.gif"
+        alt="Face Pull"
+        onerror="this.parentNode.innerHTML='🎯'">
+    </div>
+    <div class="ex-num num-o">5</div>
+    <div class="ex-info"><div class="ex-name">Face Pull (poulie haute)</div><div class="ex-target">Épaules arrière + posture</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--orange)">2×15</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="section-label">Minuteur repos</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;text-align:center;margin-bottom:10px;">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">60 secondes entre chaque série</div>
+    <div id="timer-lundi" class="timer-display">1:00</div>
+    <button class="timer-btn" onclick="startTimer('lundi')">⏱ LANCER LE MINUTEUR 60s</button>
+    <div class="rest-bar"><div id="bar-lundi" class="rest-fill" style="width:100%"></div></div>
+  </div>
+  <div class="bottom-space"></div>
+</div>
+
+<!-- ===== MERCREDI ===== -->
+<div id="panel-mercredi" class="panel">
+  <div class="session-header">
+    <div class="session-badge badge-green">🟢</div>
+    <div class="session-info">
+      <h2 style="color:var(--green)">MERCREDI — BAS DU CORPS</h2>
+      <p>Cuisses · Fessiers · Ischios — Séance métabolique clé</p>
+    </div>
+  </div>
+
+  <div style="background:rgba(0,212,106,0.07);border:1px solid rgba(0,212,106,0.3);border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#aaa;line-height:1.5;">
+    💡 <strong style="color:var(--green)">Séance prioritaire.</strong> 60% de ta masse musculaire totale. Améliore directement la sensibilité à l'insuline et la combustion de graisse viscérale.
+  </div>
+
+  <div class="section-label">Échauffement</div>
+  <div class="warm-card">
+    <div class="ex-thumb-wrap">🚴</div>
+    <div class="ex-info"><div class="ex-name">Vélo ou marche légère</div><div class="ex-target">Activer les jambes avant la charge</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--green)">5'</div><div class="sets-label">MIN</div></div>
+  </div>
+
+  <div class="section-label">Cuisses & Fessiers</div>
+
+  <div class="exercise-card accent-green key">
+    <span class="key-badge">★ PRIORITÉ</span>
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://www.inspireusafoundation.org/wp-content/uploads/2022/04/leg-press.gif"
+        alt="Leg Press"
+        onerror="this.parentNode.innerHTML='🦵'">
+    </div>
+    <div class="ex-num num-g">1</div>
+    <div class="ex-info"><div class="ex-name">Leg Press (Presse à cuisses)</div><div class="ex-target">Quads + fessiers — exercice roi</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--green)">4×12</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="exercise-card accent-green">
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://www.inspireusafoundation.org/wp-content/uploads/2022/01/leg-extension.gif"
+        alt="Leg Extension"
+        onerror="this.parentNode.innerHTML='🦵'">
+    </div>
+    <div class="ex-num num-g">2</div>
+    <div class="ex-info"><div class="ex-name">Leg Extension</div><div class="ex-target">Quadriceps isolés</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--green)">3×12</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="exercise-card accent-green">
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://www.inspireusafoundation.org/wp-content/uploads/2022/01/lying-leg-curl.gif"
+        alt="Leg Curl"
+        onerror="this.parentNode.innerHTML='🦵'">
+    </div>
+    <div class="ex-num num-g">3</div>
+    <div class="ex-info"><div class="ex-name">Leg Curl (couché ou assis)</div><div class="ex-target">Ischios-jambiers</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--green)">3×12</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="exercise-card accent-green">
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://www.inspireusafoundation.org/wp-content/uploads/2022/03/hip-abduction-machine.gif"
+        alt="Hip Abductor"
+        onerror="this.parentNode.innerHTML='🍑'">
+    </div>
+    <div class="ex-num num-g">4</div>
+    <div class="ex-info"><div class="ex-name">Hip Abductor machine</div><div class="ex-target">Fessiers moyens</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--green)">2×20</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="exercise-card accent-green">
+    <div class="ex-thumb-wrap">🦶</div>
+    <div class="ex-num num-g">5</div>
+    <div class="ex-info"><div class="ex-name">Mollets à la Leg Press</div><div class="ex-target">Pieds en bas de la plateforme</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--green)">2×20</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="section-label">Minuteur repos</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;text-align:center;margin-bottom:10px;">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">60 secondes entre chaque série</div>
+    <div id="timer-mercredi" class="timer-display" style="color:var(--green)">1:00</div>
+    <button class="timer-btn" style="background:var(--green)" onclick="startTimer('mercredi')">⏱ LANCER LE MINUTEUR 60s</button>
+    <div class="rest-bar"><div id="bar-mercredi" class="rest-fill" style="width:100%;background:var(--green)"></div></div>
+  </div>
+  <div class="bottom-space"></div>
+</div>
+
+<!-- ===== SAMEDI ===== -->
+<div id="panel-samedi" class="panel">
+  <div class="session-header">
+    <div class="session-badge badge-red">🔴</div>
+    <div class="session-info">
+      <h2 style="color:var(--red)">SAMEDI — HAUT DU CORPS B</h2>
+      <p>Épaules · Biceps · Triceps</p>
+    </div>
+  </div>
+
+  <div class="section-label">Échauffement</div>
+  <div class="warm-card">
+    <div class="ex-thumb-wrap">🚴</div>
+    <div class="ex-info"><div class="ex-name">Vélo ou marche légère</div><div class="ex-target">5 minutes d'activation</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--red)">5'</div><div class="sets-label">MIN</div></div>
+  </div>
+
+  <div class="section-label">Épaules</div>
+
+  <div class="exercise-card accent-red">
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://www.inspireusafoundation.org/wp-content/uploads/2022/04/machine-shoulder-press.gif"
+        alt="Shoulder Press"
+        onerror="this.parentNode.innerHTML='💪'">
+    </div>
+    <div class="ex-num num-r">1</div>
+    <div class="ex-info"><div class="ex-name">Shoulder Press machine</div><div class="ex-target">Deltoïdes</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--red)">3×12</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="exercise-card accent-red">
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://homegymreview.co.uk/wp-content/uploads/2021/02/Cable-Lateral-Raise-1.jpg"
+        alt="Lateral Raise"
+        onerror="this.parentNode.innerHTML='↔️'">
+    </div>
+    <div class="ex-num num-r">2</div>
+    <div class="ex-info"><div class="ex-name">Lateral Raise (poulie basse)</div><div class="ex-target">Épaules latérales</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--red)">2×15</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="section-label">Bras</div>
+
+  <div class="exercise-card accent-red">
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://www.inspireusafoundation.org/wp-content/uploads/2022/01/machine-bicep-curl.gif"
+        alt="Bicep Curl"
+        onerror="this.parentNode.innerHTML='💪'">
+    </div>
+    <div class="ex-num num-r">3</div>
+    <div class="ex-info"><div class="ex-name">Curl Biceps machine</div><div class="ex-target">Biceps isolés</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--red)">3×12</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="exercise-card accent-red">
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://fitnessvolt.com/wp-content/uploads/2019/11/tricep-rope-pushdown.gif"
+        alt="Triceps Pushdown"
+        onerror="this.parentNode.innerHTML='💥'">
+    </div>
+    <div class="ex-num num-r">4</div>
+    <div class="ex-info"><div class="ex-name">Triceps Pushdown (corde)</div><div class="ex-target">Triceps isolés</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--red)">3×12</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="exercise-card accent-red">
+    <div class="ex-thumb-wrap">
+      <img style="width:100%;height:100%;object-fit:cover;border-radius:10px"
+        src="https://homegymreview.co.uk/wp-content/uploads/2021/04/Cable-Upright-Row-female.jpg"
+        alt="Rowing menton"
+        onerror="this.parentNode.innerHTML='⬆️'">
+    </div>
+    <div class="ex-num num-r">5</div>
+    <div class="ex-info"><div class="ex-name">Rowing menton (poulie basse)</div><div class="ex-target">Trapèzes + deltoïdes</div></div>
+    <div class="ex-sets"><div class="sets-big" style="color:var(--red)">2×15</div><div class="sets-label">REPS</div></div>
+  </div>
+
+  <div class="section-label">Minuteur repos</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;text-align:center;margin-bottom:10px;">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">60 secondes entre chaque série</div>
+    <div id="timer-samedi" class="timer-display" style="color:var(--red)">1:00</div>
+    <button class="timer-btn" style="background:var(--red)" onclick="startTimer('samedi')">⏱ LANCER LE MINUTEUR 60s</button>
+    <div class="rest-bar"><div id="bar-samedi" class="rest-fill" style="width:100%;background:var(--red)"></div></div>
+  </div>
+  <div class="bottom-space"></div>
+</div>
+
+<!-- ===== TAPIS ===== -->
+<div id="panel-tapis" class="panel">
+  <div class="session-header">
+    <div class="session-badge" style="background:rgba(0,180,255,0.12)">🏃</div>
+    <div class="session-info">
+      <h2 style="color:var(--blue)">TAPIS INCLINÉ</h2>
+      <p>Protocole cardio — après la musculation</p>
+    </div>
+  </div>
+
+  <div class="hr-zone">
+    <div class="bpm">146–156</div>
+    <div class="bpm-label">BPM — Zone de combustion des graisses</div>
+  </div>
+
+  <div class="tapis-grid">
+    <div class="tapis-stat"><div class="big">40</div><div class="unit">min</div><div class="label">Durée cible</div></div>
+    <div class="tapis-stat"><div class="big">15%</div><div class="unit">max</div><div class="label">Pente maximale</div></div>
+    <div class="tapis-stat"><div class="big">5</div><div class="unit">km/h</div><div class="label">Vitesse départ</div></div>
+    <div class="tapis-stat"><div class="big">3.2</div><div class="unit">km/h</div><div class="label">Vitesse min à 15%</div></div>
+  </div>
+
+  <div class="section-label">Déroulement</div>
+
+  <div class="phase-card">
+    <div class="phase-icon">📈</div>
+    <div class="phase-info"><h3>Montée progressive</h3><p>8% → 15% · 5 km/h · +1% toutes les 5 min</p></div>
+    <div class="phase-time" style="color:var(--blue)">20'</div>
+  </div>
+  <div class="phase-card">
+    <div class="phase-icon">🎯</div>
+    <div class="phase-info"><h3>Zone cible maintenue</h3><p>15% fixe · Vitesse ajustée pour 146–156 bpm</p></div>
+    <div class="phase-time" style="color:var(--green)">15'</div>
+  </div>
+  <div class="phase-card">
+    <div class="phase-icon">📉</div>
+    <div class="phase-info"><h3>Retour au calme</h3><p>15% → 5% · 3,5 km/h · Ne pas s'arrêter brutalement</p></div>
+    <div class="phase-time" style="color:var(--yellow)">5'</div>
+  </div>
+
+  <div class="section-label">Ajustement vitesse</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span>FC &gt; 156 bpm</span><span style="color:var(--red);font-weight:600;">↓ Baisser vitesse</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span>FC entre 146–156</span><span style="color:var(--green);font-weight:600;">✓ Maintenir</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;"><span>FC &lt; 146 bpm</span><span style="color:var(--orange);font-weight:600;">↑ Augmenter vitesse</span></div>
+  </div>
+  <div class="bottom-space"></div>
+</div>
+
+<!-- ===== CONSEILS ===== -->
+<div id="panel-conseils" class="panel">
+
+  <div class="section-label">Checklist séance</div>
+  <div class="checklist">
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">🚴 5 min échauffement vélo / marche</span><span class="check-time">5 min</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">💪 40 min machines (selon le jour)</span><span class="check-time">40 min</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">🏃 40 min tapis incliné zone 146–156</span><span class="check-time">40 min</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">🧘 5 min étirements debout</span><span class="check-time">5 min</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">💧 Hydratation tout au long de la séance</span><span class="check-time">—</span></div>
+  </div>
+
+  <div class="section-label">Règle de progression</div>
+  <div class="prog-rule">
+    <h3>⚡ LA RÈGLE DES 15 REPS</h3>
+    <div class="prog-row"><span class="prog-icon">✅</span><span>Tu arrives à <strong>15 reps</strong> sur les 3 séries</span></div>
+    <div class="prog-row"><span class="prog-icon">➡️</span><span>La semaine suivante : <strong>+5 kg</strong></span></div>
+    <div class="prog-row"><span class="prog-icon">❌</span><span>Tu n'arrives pas à 15 → <strong>même poids</strong></span></div>
+  </div>
+
+  <div class="section-label">Conseils clés</div>
+
+  <div class="conseil-card highlight">
+    <div class="conseil-header"><span class="conseil-icon">🧀</span><span class="conseil-title">Fromage — la règle des 30g</span></div>
+    <div class="conseil-body">Maximum 30g par jour. Pèse-le pendant 2 semaines pour calibrer ton œil — tu seras surpris de la différence avec ta portion habituelle.</div>
+  </div>
+  <div class="conseil-card">
+    <div class="conseil-header"><span class="conseil-icon">🥩</span><span class="conseil-title">Protéines — priorité à 58 ans</span></div>
+    <div class="conseil-body">Vise <strong>1,6g de protéine par kg de poids corporel</strong> par jour (~145g/jour). Œufs, poulet, poisson, yaourt grec.</div>
+  </div>
+  <div class="conseil-card">
+    <div class="conseil-header"><span class="conseil-icon">😴</span><span class="conseil-title">Sommeil — tu coches cette case</span></div>
+    <div class="conseil-body">7–9h/nuit c'est parfait. C'est pendant le sommeil que l'hormone de croissance brûle la graisse viscérale.</div>
+  </div>
+  <div class="conseil-card">
+    <div class="conseil-header"><span class="conseil-icon">📅</span><span class="conseil-title">Vacances scolaires — 4ème séance</span></div>
+    <div class="conseil-body">Ajoute une séance le <strong>jeudi</strong> : bas du corps ou Haut A allégé selon ta fatigue.</div>
+  </div>
+  <div class="conseil-card">
+    <div class="conseil-header"><span class="conseil-icon">⏱</span><span class="conseil-title">Repos 60 secondes max</span></div>
+    <div class="conseil-body">Maintient la FC élevée entre les exercices — ça transforme la muscu en cardio-muscu et booste la dépense calorique globale.</div>
+  </div>
+
+  <div class="section-label">Planning semaine type</div>
+  <div class="cal-week">
+    <div class="cal-day active-day"><div class="day-name">Lun</div><div class="day-icon">🔵</div><div class="day-label">Haut A</div></div>
+    <div class="cal-day"><div class="day-name">Mar</div><div class="day-icon">😴</div><div class="day-label">Repos</div></div>
+    <div class="cal-day active-day" style="border-color:var(--green);background:rgba(0,212,106,0.08)"><div class="day-name" style="color:var(--green)">Mer</div><div class="day-icon">🟢</div><div class="day-label">Bas</div></div>
+    <div class="cal-day"><div class="day-name">Jeu</div><div class="day-icon">😴</div><div class="day-label">Repos</div></div>
+    <div class="cal-day"><div class="day-name">Ven</div><div class="day-icon">😴</div><div class="day-label">Repos</div></div>
+    <div class="cal-day active-day" style="border-color:var(--red);background:rgba(255,51,102,0.08)"><div class="day-name" style="color:var(--red)">Sam</div><div class="day-icon">🔴</div><div class="day-label">Haut B</div></div>
+    <div class="cal-day"><div class="day-name">Dim</div><div class="day-icon">😴</div><div class="day-label">Repos</div></div>
+  </div>
+
+  <div class="bottom-space"></div>
+</div>
+
+<script>
+  const timers = {};
+
+  function switchTab(id, el) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active','blue','red','tapis','conseils'));
+    document.getElementById('panel-' + id).classList.add('active');
+    el.classList.add('active');
+    if (id==='mercredi') el.classList.add('blue');
+    if (id==='samedi') el.classList.add('red');
+    if (id==='tapis') el.classList.add('tapis');
+    if (id==='conseils') el.classList.add('conseils');
+  }
+
+  function startTimer(id) {
+    if (timers[id]) { clearInterval(timers[id]); delete timers[id]; }
+    const display = document.getElementById('timer-' + id);
+    const bar = document.getElementById('bar-' + id);
+    const btn = display.nextElementSibling;
+    display.style.display = 'block';
+    btn.style.display = 'none';
+    let seconds = 60;
+    bar.style.width = '100%';
+    timers[id] = setInterval(() => {
+      seconds--;
+      const m = Math.floor(seconds/60);
+      const s = seconds%60;
+      display.textContent = m+':'+String(s).padStart(2,'0');
+      bar.style.width = (seconds/60*100)+'%';
+      if (seconds <= 0) {
+        clearInterval(timers[id]); delete timers[id];
+        display.textContent = '✅ GO !';
+        setTimeout(() => {
+          display.style.display = 'none';
+          btn.style.display = 'block';
+          btn.textContent = '⏱ RELANCER 60s';
+          bar.style.width = '100%';
+        }, 1500);
+      }
+    }, 1000);
+  }
+
+  function toggleCheck(item) {
+    item.classList.toggle('done');
+    item.querySelector('.check-box').textContent = item.classList.contains('done') ? '✓' : '';
+  }
+</script>
+</body>
+</html>
